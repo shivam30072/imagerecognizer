@@ -1,3 +1,4 @@
+require("@tensorflow/tfjs-node");
 const express = require("express");
 const app = express();
 const imageRouter = require("./routes/imageRoute");

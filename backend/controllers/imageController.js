@@ -1,4 +1,6 @@
 const asyncHandler = require("express-async-handler");
+const mobilenet = require("@tensorflow-models/mobilenet");
+const { createCanvas, loadImage } = require("canvas");
 const path = require("path");
 
 /*
@@ -27,9 +29,26 @@ const sendImage = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("Image not found");
   }
-
   // creating imagePath
   const imagePath = path.join(__dirname, "../uploads", filename);
+
+  const canvas = createCanvas(640, 480);
+  const ctx = canvas.getContext("2d");
+  const image = await loadImage(imagePath);
+  ctx.drawImage(image, 0, 0);
+
+  const model = await mobilenet.load();
+
+  const predictions = await model.classify(canvas);
+  const extractedData = [];
+
+  predictions.forEach((prediction) => {
+    extractedData.push(prediction.className);
+    const score = Math.round(prediction.probability * 1000);
+    extractedData.push(score);
+  });
+  console.log(extractedData);
+  console.log(predictions);
   res.sendFile(imagePath);
 });
 

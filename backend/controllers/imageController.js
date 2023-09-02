@@ -19,16 +19,22 @@ const uploadImage = asyncHandler(async (req, res) => {
   const imageUrl = `http://localhost:5000/api/image/${filename}`;
 
   const imagePath = path.join(__dirname, "../uploads", filename);
+
   const canvas = createCanvas(640, 480);
   const ctx = canvas.getContext("2d");
   const image = await loadImage(imagePath);
   ctx.drawImage(image, 0, 0);
 
-  const model = await mobilenet.load();
+  const absolutePath = path.join(__dirname, "../model/model.json");
+  console.log(absolutePath);
+
+  const model = await mobilenet.load({
+    version: 1,
+    alpha: 0.5,
+    modelUrl: `file://${absolutePath}`,
+  });
 
   const predictions = await model.classify(canvas);
-
-  console.log();
 
   res.status(200).json({ imageUrl, predictions });
 });

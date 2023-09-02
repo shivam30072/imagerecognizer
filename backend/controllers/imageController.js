@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const mobilenet = require("@tensorflow-models/mobilenet");
 const { createCanvas, loadImage } = require("canvas");
 const path = require("path");
+const fs = require("fs");
 
 /*
 req - POST
@@ -30,7 +31,7 @@ const uploadImage = asyncHandler(async (req, res) => {
 
   const model = await mobilenet.load({
     version: 1,
-    alpha: 0.5,
+    alpha: 1.0,
     modelUrl: `file://${absolutePath}`,
   });
 
@@ -41,7 +42,7 @@ const uploadImage = asyncHandler(async (req, res) => {
 
 /*
 req - GET
-desc - fetching params from above imageURL and sending file from inside the uploads folder
+desc - fetching filename from from above imageURL and sending file from inside the uploads folder
 */
 const sendImage = asyncHandler(async (req, res) => {
   const filename = req.params.filename;
@@ -55,4 +56,25 @@ const sendImage = asyncHandler(async (req, res) => {
   res.sendFile(imagePath);
 });
 
-module.exports = { uploadImage, sendImage };
+/*
+req - DELETE
+desc - extracting filename from params and deleting the file from uploads folder
+*/
+const deleteImage = asyncHandler(async (req, res) => {
+  const filename = req.params.filename;
+  if (!filename) {
+    res.status(404);
+    throw new Error("Image not found");
+  }
+  // creating imagePath
+  const imagePath = path.join(__dirname, "../uploads", filename);
+
+  if (fs.existsSync(imagePath)) {
+    // Delete the file
+    fs.unlinkSync(imagePath);
+    res.status(200).json({ message: "Image deleted successfully" });
+  } else {
+    res.status(404).json({ message: "Image not found" });
+  }
+});
+module.exports = { uploadImage, sendImage, deleteImage };

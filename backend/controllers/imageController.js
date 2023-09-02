@@ -13,10 +13,24 @@ const uploadImage = asyncHandler(async (req, res) => {
     throw new Error("Image not found");
   }
 
-  // sending imageURL to front-end
-  const imageUrl = `http://localhost:5000/api/image/${req.file.filename}`;
+  const filename = req.file.filename;
 
-  res.status(200).json({ imageUrl });
+  // sending imageURL to front-end
+  const imageUrl = `http://localhost:5000/api/image/${filename}`;
+
+  const imagePath = path.join(__dirname, "../uploads", filename);
+  const canvas = createCanvas(640, 480);
+  const ctx = canvas.getContext("2d");
+  const image = await loadImage(imagePath);
+  ctx.drawImage(image, 0, 0);
+
+  const model = await mobilenet.load();
+
+  const predictions = await model.classify(canvas);
+
+  console.log();
+
+  res.status(200).json({ imageUrl, predictions });
 });
 
 /*
@@ -32,23 +46,6 @@ const sendImage = asyncHandler(async (req, res) => {
   // creating imagePath
   const imagePath = path.join(__dirname, "../uploads", filename);
 
-  const canvas = createCanvas(640, 480);
-  const ctx = canvas.getContext("2d");
-  const image = await loadImage(imagePath);
-  ctx.drawImage(image, 0, 0);
-
-  const model = await mobilenet.load();
-
-  const predictions = await model.classify(canvas);
-  const extractedData = [];
-
-  predictions.forEach((prediction) => {
-    extractedData.push(prediction.className);
-    const score = Math.round(prediction.probability * 1000);
-    extractedData.push(score);
-  });
-  console.log(extractedData);
-  console.log(predictions);
   res.sendFile(imagePath);
 });
 

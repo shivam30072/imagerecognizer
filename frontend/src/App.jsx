@@ -1,10 +1,12 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const App = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [predictions, setPredictions] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  
 
   const handleUpload = async (e) => {
     const formData = new FormData();
@@ -14,9 +16,10 @@ const App = () => {
 
     try {
       setLoading(true); // Start loading
-      const response = await axios.post("/api/image", formData);
-      setUploadedFile(response.data.imageUrl);
-      setPredictions(response.data.predictions);
+      const {data : {imageUrl, predictions}} = await axios.post("/api/image", formData);
+
+      setUploadedFile(imageUrl);
+      setPredictions(predictions);
     } catch (error) {
       console.error("Error uploading file:", error);
     } finally {
@@ -25,10 +28,11 @@ const App = () => {
   };
 
   const handleReset = () => {
-    // Clear uploaded image and predictions
-    setUploadedFile(null);
-    setPredictions([]);
+  setUploadedFile(null)
+  setPredictions([])
   };
+
+ 
 
   return (
     <div className=" min-h-screen flex flex-col items-center justify-center bg-[#1b2329] text-white">
@@ -41,7 +45,7 @@ const App = () => {
               src={uploadedFile}
               alt={uploadedFile.name}
             />
-<button onClick={handleReset} className="btn btn-circle btn-outline">
+<button onClick={handleReset} className="btn btn-circle btn-outline bg-white ">
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
 </button>
           </>
@@ -57,7 +61,7 @@ const App = () => {
         {loading ? (
           <progress className="loader progress progress-primary w-56"></progress>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 mt-3">
             {predictions.map((p, index) => (
               <div
                 key={index}

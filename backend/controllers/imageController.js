@@ -16,7 +16,7 @@ const uploadImage = asyncHandler(async (req, res) => {
   const filename = req.file.filename;
 
   // sending imageURL to front-end
-  const imageUrl = `http://localhost:5000/api/image/${filename}`;
+  const imageUrl = `https://imagerecognizer.vercel.app/api/image/${filename}`;
 
   const imagePath = path.join(__dirname, "../uploads", filename);
 

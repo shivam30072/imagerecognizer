@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "https://imageimage.onrender.com/", // Don't change this
+      "/api/image": "https://imageimage.onrender.com/", // Don't change this
     },
   },
 });

@@ -1,4 +1,5 @@
 require("@tensorflow/tfjs-node");
+require("dotenv").config();
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -10,10 +11,6 @@ const uploadDir = path.join(__dirname, "./uploads");
 app.use(express.json());
 
 app.use("/api/image", imageRouter);
-
-app.get("/", (req, res) => {
-  res.send("api running");
-});
 
 function deleteExcessFiles(maxFiles) {
   fs.readdir(uploadDir, (err, files) => {
@@ -42,6 +39,23 @@ function deleteExcessFiles(maxFiles) {
     }
   });
 }
+
+//-----------------------------deployment--------------------
+
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname1, "/frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("api running");
+  });
+}
+
+//-----------------------------deployment--------------------
 
 const maxFilesToKeep = 1;
 setInterval(() => {
